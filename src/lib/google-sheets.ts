@@ -45,6 +45,7 @@ const DATA_RANGE = `${SHEET_NAME}!A:V`; // Covers columns A (Timestamp) to V (cr
 
 // Function to map sheet rows to AiTool objects
 // Adjusted to your sheet structure
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapRowToAiTool(row: any[]): AiTool | null {
   if (!row || !row[0]) { // Timestamp (A) must exist to be a valid row for an ID
     return null;
@@ -152,6 +153,7 @@ export async function addToolToSheet(tool: Omit<AiTool, 'id' | 'createdAt'> & { 
 
   } catch (error) {
     console.error('Error adding tool to Google Sheets:', error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const err = error as any;
     if (err.response && err.response.data && err.response.data.error) {
         console.error('Google API Error Details:', JSON.stringify(err.response.data.error, null, 2));
