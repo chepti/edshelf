@@ -3,9 +3,9 @@ import { Collection } from '@/types';
 import { auth } from '@clerk/nextjs/server';
 
 // Mock data for now - in a real app, this would be in a database and scoped by userId
-let collections: Collection[] = [];
+const collections: Collection[] = [];
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const { userId } = await auth();
   if (!userId) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });

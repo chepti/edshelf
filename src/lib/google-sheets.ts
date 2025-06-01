@@ -1,7 +1,7 @@
 // This file will contain the logic to interact with the Google Sheets API.
 // We'll use the googleapis library.
 
-import { google } from 'googleapis';
+// import { google } from 'googleapis'; // Commented out as 'google' is not used in active code
 
 // TODO: Implement functions to:
 // 1. Authenticate with Google Sheets API (using service account or OAuth2)

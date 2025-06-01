@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { Review } from '@/types';
 // import { getReviewsFromSheet, addReviewToSheet } from '@/lib/google-sheets';
 
-let reviews: Review[] = []; // Mock data
+const reviews: Review[] = []; // Mock data
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

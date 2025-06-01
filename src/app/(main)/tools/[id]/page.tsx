@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Link from 'next/link';
+// import Link from 'next/link'; // Removed
 import { AiTool, Review, Example } from '@/types';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExternalLink, MessageSquare, Star, PlusCircle, FileText, Users } from 'lucide-react';
+// import { ExternalLink, MessageSquare, Star, PlusCircle, FileText, Users } from 'lucide-react'; // Modified
+import { ExternalLink, MessageSquare, Star, PlusCircle, FileText } from 'lucide-react'; // Modified
 
 // Mock fetching functions - replace with actual API calls
 async function fetchToolById(id: string): Promise<AiTool | null> {

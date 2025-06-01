@@ -3,7 +3,7 @@ import { AiTool } from '@/types';
 // import { getToolsFromSheet, addToolToSheet } from '@/lib/google-sheets'; // Placeholder for actual functions
 
 // Mock data for now - replace with Google Sheets integration
-let tools: AiTool[] = [
+const tools: AiTool[] = [
   {
     id: '1',
     name: 'Cool AI Tool 1',
@@ -24,7 +24,7 @@ let tools: AiTool[] = [
   },
 ];
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
     // In the future, this will call a function like getToolsFromSheet()
     // const toolsFromSheet = await getToolsFromSheet();

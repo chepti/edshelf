@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { Example } from '@/types';
 // import { getExamplesFromSheet, addExampleToSheet } from '@/lib/google-sheets';
 
-let examples: Example[] = []; // Mock data
+const examples: Example[] = []; // Mock data
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
