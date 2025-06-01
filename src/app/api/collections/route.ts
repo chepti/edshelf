@@ -5,6 +5,7 @@ import { auth } from '@clerk/nextjs/server';
 // Mock data for now - in a real app, this would be in a database and scoped by userId
 const collections: Collection[] = [];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function GET(_request: Request) {
   const { userId } = await auth();
   if (!userId) {
