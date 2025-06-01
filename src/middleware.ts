@@ -7,10 +7,9 @@ const isProtectedRoute = createRouteMatcher([
   // Add other routes that require authentication
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+export default clerkMiddleware((auth, req) => {
   if (isProtectedRoute(req)) {
-    const authObject = await auth();
-    authObject.protect();
+    auth().protect();
   }
 });
 
