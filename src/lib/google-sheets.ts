@@ -166,11 +166,13 @@ export async function addToolToSheet(tool: Omit<AiTool, 'id' | 'createdAt'> & { 
 // Placeholder for other functions if needed in the future
 // export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> { /* ... */ }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function updateToolInSheet(_id: string, _updates: Partial<AiTool>): Promise<AiTool | null> {
   // Implementation needed
   throw new Error('Method not implemented');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteToolFromSheet(_id: string): Promise<boolean> {
   // Implementation needed
   throw new Error('Method not implemented');
