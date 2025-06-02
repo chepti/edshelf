@@ -169,3 +169,47 @@ export async function addToolToSheet(tool: Omit<AiTool, 'id' | 'createdAt'> & { 
 // export async function deleteToolFromSheet(id: string): Promise<boolean> { /* ... */ }
 
 // Remove this if you have actual exports like getToolsFromSheet and addToolToSheet 
+
+export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> {
+  try {
+    const sheets = await getSheetsClient();
+    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
+    
+    console.log(`Fetching tool from sheet: ${spreadsheetId}, range: ${DATA_RANGE}`);
+
+    const response = await sheets.spreadsheets.values.get({
+      spreadsheetId,
+      range: DATA_RANGE,
+    });
+
+    const rows = response.data.values;
+    if (rows && rows.length) {
+      const tool = rows
+        .map(mapRowToAiTool)
+        .find(tool => tool && tool.id === id);
+      if (tool) {
+        console.log(`Successfully fetched tool with ID: ${id}`);
+        return tool;
+      } else {
+        console.log(`No tool found with ID: ${id}`);
+        return null;
+      }
+    } else {
+      console.log('No tools found in the sheet or sheet is empty.');
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching tool from Google Sheets:', error);
+    throw new Error('Failed to fetch tool from Google Sheets');
+  }
+}
+
+export async function updateToolInSheet(id: string, updates: Partial<AiTool>): Promise<AiTool | null> {
+  // Implementation needed
+  throw new Error('Method not implemented');
+}
+
+export async function deleteToolFromSheet(id: string): Promise<boolean> {
+  // Implementation needed
+  throw new Error('Method not implemented');
+} 

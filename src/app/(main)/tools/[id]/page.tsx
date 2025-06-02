@@ -12,10 +12,12 @@ import { ExternalLink, MessageSquare, Star, PlusCircle, FileText } from 'lucide-
 
 // Mock fetching functions - replace with actual API calls
 async function fetchToolById(id: string): Promise<AiTool | null> {
-  const res = await fetch('/api/tools'); // In a real API, you'd fetch /api/tools/[id]
-  if (!res.ok) throw new Error('Failed to fetch tool');
-  const tools: AiTool[] = await res.json();
-  return tools.find(tool => tool.id === id) || null;
+  const res = await fetch(`/api/tools/${id}`); // Fetch the specific tool by ID
+  if (!res.ok) {
+    if (res.status === 404) return null; // Tool not found
+    throw new Error('Failed to fetch tool');
+  }
+  return res.json();
 }
 
 async function fetchReviewsByToolId(toolId: string): Promise<Review[]> {
