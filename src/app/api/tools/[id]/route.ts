@@ -3,7 +3,8 @@ import { getToolByIdFromSheet } from '@/lib/google-sheets';
 
 export async function GET(
   request: NextRequest,
-  context: any // Using 'any' as a workaround for the persistent type error
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  context: any // Using 'any' as a workaround for the persistent type error, ESLint rule disabled for this line
 ) {
   try {
     // Perform type assertion for params internally
