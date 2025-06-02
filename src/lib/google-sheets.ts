@@ -168,4 +168,4 @@ export async function addToolToSheet(tool: Omit<AiTool, 'id' | 'createdAt'> & { 
 // export async function updateToolInSheet(id: string, updates: Partial<AiTool>): Promise<AiTool | null> { /* ... */ }
 // export async function deleteToolFromSheet(id: string): Promise<boolean> { /* ... */ }
 
-export {}; // Remove this if you have actual exports like getToolsFromSheet and addToolToSheet 
+// Remove this if you have actual exports like getToolsFromSheet and addToolToSheet 
