@@ -165,10 +165,16 @@ export async function addToolToSheet(tool: Omit<AiTool, 'id' | 'createdAt'> & { 
 
 // Placeholder for other functions if needed in the future
 // export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> { /* ... */ }
-// export async function updateToolInSheet(id: string, updates: Partial<AiTool>): Promise<AiTool | null> { /* ... */ }
-// export async function deleteToolFromSheet(id: string): Promise<boolean> { /* ... */ }
 
-// Remove this if you have actual exports like getToolsFromSheet and addToolToSheet 
+export async function updateToolInSheet(_id: string, _updates: Partial<AiTool>): Promise<AiTool | null> {
+  // Implementation needed
+  throw new Error('Method not implemented');
+}
+
+export async function deleteToolFromSheet(_id: string): Promise<boolean> {
+  // Implementation needed
+  throw new Error('Method not implemented');
+}
 
 export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> {
   try {
@@ -202,14 +208,4 @@ export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> {
     console.error('Error fetching tool from Google Sheets:', error);
     throw new Error('Failed to fetch tool from Google Sheets');
   }
-}
-
-export async function updateToolInSheet(id: string, updates: Partial<AiTool>): Promise<AiTool | null> {
-  // Implementation needed
-  throw new Error('Method not implemented');
-}
-
-export async function deleteToolFromSheet(id: string): Promise<boolean> {
-  // Implementation needed
-  throw new Error('Method not implemented');
 } 
