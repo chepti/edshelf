@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getToolByIdFromSheet } from '@/lib/google-sheets';
 
 export async function GET(
-  request: Request, // request is not used, but must be the first parameter
+  request: NextRequest, // Changed from Request to NextRequest
   { params }: { params: { id: string } }
 ) {
   try {
