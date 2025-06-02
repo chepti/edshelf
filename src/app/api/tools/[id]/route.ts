@@ -1,19 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToolByIdFromSheet } from '@/lib/google-sheets';
 
-// Define an interface for the route context
-interface RouteContext {
-  params: {
-    id: string;
-  };
-}
-
 export async function GET(
   request: NextRequest,
-  context: RouteContext // Use the defined interface for the second argument
+  context: any // Using 'any' as a workaround for the persistent type error
 ) {
   try {
-    const id = context.params.id; // Access id from context.params
+    // Perform type assertion for params internally
+    const params = context.params as { id: string };
+    const id = params.id;
+
     if (!id) {
       return NextResponse.json({ message: 'Tool ID is required' }, { status: 400 });
     }
@@ -26,8 +22,8 @@ export async function GET(
 
     return NextResponse.json(tool);
   } catch (error) {
-    // Safely access id for logging, in case context.params itself is problematic
-    const errorId = context?.params?.id || "unknown";
+    // Safely access id for logging, attempting a similar cast if context.params exists
+    const errorId = (context?.params as { id: string })?.id || "unknown";
     console.error(`Failed to get tool with id ${errorId}:`, error);
     return NextResponse.json({ message: 'Failed to fetch tool', error: (error as Error).message }, { status: 500 });
   }
