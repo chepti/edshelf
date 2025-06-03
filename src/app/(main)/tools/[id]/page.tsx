@@ -15,20 +15,20 @@ async function fetchToolById(id: string): Promise<AiTool | null> {
   const res = await fetch(`/api/tools/${id}`); // Fetch the specific tool by ID
   if (!res.ok) {
     if (res.status === 404) return null; // Tool not found
-    throw new Error('Failed to fetch tool');
+    throw new Error('שגיאה באחזור הכלי'); // Translated
   }
   return res.json();
 }
 
 async function fetchReviewsByToolId(toolId: string): Promise<Review[]> {
   const res = await fetch(`/api/reviews?toolId=${toolId}`);
-  if (!res.ok) throw new Error('Failed to fetch reviews');
+  if (!res.ok) throw new Error('שגיאה באחזור הביקורות'); // Translated
   return res.json();
 }
 
 async function fetchExamplesByToolId(toolId: string): Promise<Example[]> {
   const res = await fetch(`/api/examples?toolId=${toolId}`);
-  if (!res.ok) throw new Error('Failed to fetch examples');
+  if (!res.ok) throw new Error('שגיאה באחזור הדוגמאות'); // Translated
   return res.json();
 }
 
@@ -55,15 +55,15 @@ export default function ToolDetailPage() {
         setLoading(false);
       }).catch(err => {
         console.error(err);
-        setError("Failed to load tool details. " + err.message);
+        setError("שגיאה בטעינת פרטי הכלי. " + err.message); // Translated
         setLoading(false);
       });
     }
   }, [id]);
 
-  if (loading) return <p>Loading tool details...</p>;
-  if (error) return <p>Error: {error}</p>;
-  if (!tool) return <p>Tool not found.</p>;
+  if (loading) return <p>טוען פרטי כלי...</p>; // Translated
+  if (error) return <p>שגיאה: {error}</p>; // Translated
+  if (!tool) return <p>הכלי לא נמצא.</p>; // Translated
 
   const averageRating = reviews.length > 0 
     ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
@@ -76,15 +76,15 @@ export default function ToolDetailPage() {
           <div className="flex justify-between items-start">
             <CardTitle className="text-3xl font-bold">{tool.name}</CardTitle>
             <a href={tool.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
-              <Button variant="outline"><ExternalLink size={20} className="mr-2" />Visit Tool</Button>
+              <Button variant="outline"><ExternalLink size={20} className="ms-2" />מעבר לכלי</Button> {/* Translated & RTL margin */}
             </a>
           </div>
           <CardDescription className="text-lg">{tool.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <strong>Created by:</strong> {tool.createdBy} <br />
-            <strong>Added on:</strong> {new Date(tool.createdAt).toLocaleDateString()}
+            <strong>נוצר על ידי:</strong> {tool.createdBy} <br /> {/* Translated */}
+            <strong>נוסף בתאריך:</strong> {new Date(tool.createdAt).toLocaleDateString()} {/* Translated */}
           </div>
           {tool.tags && tool.tags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
@@ -95,7 +95,7 @@ export default function ToolDetailPage() {
           )}
           <div className="flex items-center gap-2 text-yellow-500 mb-6">
             <Star fill="currentColor" /> 
-            <span>{averageRating > 0 ? `${averageRating.toFixed(1)}/5 stars` : 'No reviews yet'} ({reviews.length} reviews)</span>
+            <span>{averageRating > 0 ? `${averageRating.toFixed(1)}/5 כוכבים` : 'אין עדיין ביקורות'} ({reviews.length} ביקורות)</span> {/* Translated */}
           </div>
         </CardContent>
       </Card>
@@ -103,9 +103,9 @@ export default function ToolDetailPage() {
       {/* Reviews Section */}
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold flex items-center"><MessageSquare className="mr-2" />Reviews</h2>
+          <h2 className="text-2xl font-semibold flex items-center"><MessageSquare className="ms-2" />ביקורות</h2> {/* Translated & RTL margin */}
           {/* TODO: Add Review Button - only for logged in users */}
-          <Button variant="outline"><PlusCircle className="mr-2"/>Add Review</Button>
+          <Button variant="outline"><PlusCircle className="ms-2"/>הוספת ביקורת</Button> {/* Translated & RTL margin */}
         </div>
         {reviews.length > 0 ? (
           <div className="space-y-4">
@@ -113,7 +113,7 @@ export default function ToolDetailPage() {
               <Card key={review.id} className="bg-gray-50">
                 <CardHeader>
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold">User: {review.userId}</span> 
+                    <span className="font-semibold">משתמש: {review.userId}</span> {/* Translated */}
                     <span className="text-sm text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
                   </div>
                   <div className="flex text-yellow-500">
@@ -127,16 +127,16 @@ export default function ToolDetailPage() {
             ))}
           </div>
         ) : (
-          <p>No reviews yet. Be the first to add one!</p>
+          <p>אין עדיין ביקורות. רוצה להוסיף את הביקורת הראשונה?</p> {/* Translated */}
         )}
       </section>
 
       {/* Examples & Tutorials Section */}
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold flex items-center"><FileText className="mr-2" />Examples & Tutorials</h2>
+          <h2 className="text-2xl font-semibold flex items-center"><FileText className="ms-2" />דוגמאות ומדריכים</h2> {/* Translated & RTL margin */}
           {/* TODO: Add Example Button - only for logged in users */}
-          <Button variant="outline"><PlusCircle className="mr-2"/>Add Example/Tutorial</Button>
+          <Button variant="outline"><PlusCircle className="ms-2"/>הוסף דוגמה / מדריך</Button> {/* Translated & RTL margin */}
         </div>
         {examples.length > 0 ? (
           <div className="space-y-4">
@@ -144,24 +144,24 @@ export default function ToolDetailPage() {
               <Card key={example.id} className="bg-gray-50">
                 <CardHeader>
                   <CardTitle>{example.title}</CardTitle>
-                  <CardDescription>By: {example.userId} on {new Date(example.createdAt).toLocaleDateString()}</CardDescription>
+                  <CardDescription>על ידי: {example.userId} בתאריך {new Date(example.createdAt).toLocaleDateString()}</CardDescription> {/* Translated */}
                 </CardHeader>
                 <CardContent>
                   <p className="mb-2">{example.description}</p>
                   {example.link && 
                     <a href={example.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                      <Button variant="link" size="sm"><ExternalLink size={16} className="mr-1"/>View Link</Button>
+                      <Button variant="link" size="sm"><ExternalLink size={16} className="ms-1"/>צפייה בקישור</Button> {/* Translated & RTL margin */}
                     </a>}
                   {example.fileUrl && 
                     <a href={example.fileUrl} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-2">
-                       <Button variant="link" size="sm"><FileText size={16} className="mr-1"/>View File</Button>
+                       <Button variant="link" size="sm"><FileText size={16} className="ms-1"/>צפייה בקובץ</Button> {/* Translated & RTL margin */}
                     </a>}
                 </CardContent>
               </Card>
             ))}
           </div>
         ) : (
-          <p>No examples or tutorials yet. Share your knowledge!</p>
+          <p>אין עדיין דוגמאות או מדריכים. רוצה לשתף מהידע שלך?</p> {/* Translated */}
         )}
       </section>
 

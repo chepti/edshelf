@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
-import { Assistant } from "next/font/google";
+import { Rubik } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs';
 // import { dark } from '@clerk/themes'; // Optional: if you want a dark theme for Clerk components
 
-const assistant = Assistant({ 
-  subsets: ["hebrew"],
-  weight: ["400", "700"]
+const rubik = Rubik({ 
+  subsets: ["hebrew", "latin"],
+  weight: ["300", "400", "500", "700"],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default function RootLayout({
       // }}
     >
       <html lang="he" dir="rtl">
-        <body className={assistant.className}>{children}</body>
+        <body className={rubik.className}>{children}</body>
       </html>
     </ClerkProvider>
   );
