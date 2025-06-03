@@ -75,8 +75,8 @@ export default function ToolDetailPage() {
         <CardHeader>
           <div className="flex justify-between items-start">
             <CardTitle className="text-3xl font-bold">{tool.name}</CardTitle>
-            <a href={tool.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
-              <Button variant="outline"><ExternalLink size={20} className="ms-2" />מעבר לכלי</Button> {/* Translated & RTL margin */}
+            <a href={tool.link} target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded-2xl transition-colors duration-150"><ExternalLink size={20} className="ms-2" />מעבר לכלי</Button>
             </a>
           </div>
           <CardDescription className="text-lg">{tool.description}</CardDescription>
@@ -103,9 +103,8 @@ export default function ToolDetailPage() {
       {/* Reviews Section */}
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold flex items-center"><MessageSquare className="ms-2" />ביקורות</h2> {/* Translated & RTL margin */}
-          {/* TODO: Add Review Button - only for logged in users */}
-          <Button variant="outline"><PlusCircle className="ms-2"/>הוספת ביקורת</Button> {/* Translated & RTL margin */}
+          <h2 className="text-2xl font-semibold flex items-center"><MessageSquare className="ms-2" />ביקורות</h2>
+          <Button variant="outline" className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded-2xl transition-colors duration-150"><PlusCircle className="ms-2"/>הוספת ביקורת</Button>
         </div>
         {reviews.length > 0 ? (
           <div className="space-y-4">
@@ -127,16 +126,15 @@ export default function ToolDetailPage() {
             ))}
           </div>
         ) : (
-          <p>אין עדיין ביקורות. רוצה להוסיף את הביקורת הראשונה?</p> {/* Translated */}
+          <p>אין עדיין ביקורות. רוצה להוסיף את הביקורת הראשונה?</p>
         )}
       </section>
 
       {/* Examples & Tutorials Section */}
       <section>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold flex items-center"><FileText className="ms-2" />דוגמאות ומדריכים</h2> {/* Translated & RTL margin */}
-          {/* TODO: Add Example Button - only for logged in users */}
-          <Button variant="outline"><PlusCircle className="ms-2"/>הוסף דוגמה / מדריך</Button> {/* Translated & RTL margin */}
+          <h2 className="text-2xl font-semibold flex items-center"><FileText className="ms-2" />דוגמאות ומדריכים</h2>
+          <Button variant="outline" className="border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded-2xl transition-colors duration-150"><PlusCircle className="ms-2"/>הוסף דוגמה / מדריך</Button>
         </div>
         {examples.length > 0 ? (
           <div className="space-y-4">
@@ -161,7 +159,7 @@ export default function ToolDetailPage() {
             ))}
           </div>
         ) : (
-          <p>אין עדיין דוגמאות או מדריכים. רוצה לשתף מהידע שלך?</p> {/* Translated */}
+          <p>אין עדיין דוגמאות או מדריכים. רוצה לשתף מהידע שלך?</p>
         )}
       </section>
 

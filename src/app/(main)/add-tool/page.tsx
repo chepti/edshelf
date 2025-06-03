@@ -101,7 +101,11 @@ export default function AddToolPage() {
 
         {submitError && <p className="text-red-500">שגיאה: {submitError}</p>}
 
-        <Button type="submit" disabled={isSubmitting} className="w-full">
+        <Button 
+          type="submit" 
+          disabled={isSubmitting} 
+          className="w-full bg-brand-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-5xl text-lg transition-colors duration-150 shadow hover:shadow-md disabled:opacity-75"
+        >
           {isSubmitting ? 'שולח...' : 'הוסף כלי'}
         </Button>
       </form>

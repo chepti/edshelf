@@ -49,7 +49,7 @@ export default function ToolsPage() {
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold">מאגר הכלים</h1>
         <Link href="/add-tool">
-          <Button>הוספת כלי חדש</Button>
+          <Button className="bg-brand-accent hover:bg-opacity-90 text-white font-bold py-2 px-4 rounded-5xl transition-colors duration-150 shadow hover:shadow-md">הוספת כלי חדש</Button>
         </Link>
       </div>
       <Input
@@ -88,7 +88,7 @@ export default function ToolsPage() {
             </CardContent>
             <CardFooter>
               <Link href={`/tools/${tool.id}`} className="w-full">
-                <Button variant="outline" className="w-full">פרטים נוספים</Button>
+                <Button variant="outline" className="w-full border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white rounded-2xl transition-colors duration-150">פרטים נוספים</Button>
               </Link>
             </CardFooter>
           </Card>

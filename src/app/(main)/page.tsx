@@ -7,14 +7,14 @@ export default function HomePage() {
       <p className="text-xl mb-8">
         גלו, שתפו ודונו בכלי בינה מלאכותית שיכולים לסייע בחינוך ובהוראה.
       </p>
-      <div className="space-x-4">
+      <div className="space-x-4 rtl:space-x-reverse">
         <Link href="/tools"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded text-lg"
+          className="bg-brand-primary hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-5xl text-lg transition-colors duration-150 shadow hover:shadow-md"
         >
           לכל הכלים
         </Link>
         <Link href="/add-tool"
-          className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded text-lg"
+          className="bg-brand-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-5xl text-lg transition-colors duration-150 shadow hover:shadow-md"
         >
           הוספת כלי חדש
         </Link>
