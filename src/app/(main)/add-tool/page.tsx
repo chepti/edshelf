@@ -2,113 +2,72 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useForm, SubmitHandler } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { AiTool } from '@/types';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea"; // Assuming shadcn/ui textarea
-import { Label } from "@/components/ui/label"; // Assuming shadcn/ui label
 import { useUser } from '@clerk/nextjs';
-
-const toolSchema = z.object({
-  name: z.string().min(3, 'שם הכלי חייב להכיל לפחות 3 תווים'),
-  description: z.string().min(10, 'התיאור חייב להכיל לפחות 10 תווים'),
-  link: z.string().url('חייבת להיות כתובת URL חוקית'),
-  tags: z.string().optional(), // Comma-separated tags
-});
-
-type ToolFormValues = z.infer<typeof toolSchema>;
+import { ToolForm } from '@/components/forms/ToolForm'; // ToolFormData removed from this import
+import { ToolFormData } from '@/lib/validators/toolSchema'; // Import ToolFormData from its definition file
+import { toast } from 'react-hot-toast';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AiTool } from '@/types'; // For the return type of the API
 
 export default function AddToolPage() {
   const router = useRouter();
   const { user } = useUser();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false); // Renamed from isSubmitting for clarity in page context
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm<ToolFormValues>({
-    resolver: zodResolver(toolSchema),
-  });
-
-  const onSubmit: SubmitHandler<ToolFormValues> = async (data) => {
+  const handleSubmit = async (values: ToolFormData) => {
     if (!user) {
-      setSubmitError("עליך להתחבר כדי להוסיף כלי.");
+      toast.error('עליך להיות מחובר כדי להוסיף כלי.');
       return;
     }
-    setIsSubmitting(true);
-    setSubmitError(null);
 
-    const toolData: Omit<AiTool, 'id' | 'createdAt'> = {
-      ...data,
-      tags: data.tags ? data.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-      createdBy: user.id, // Or user.fullName, user.username etc.
+    setIsLoading(true);
+    // Construct the data payload, ensuring generalRating is a number if present, or undefined
+    const payload = {
+      ...values,
+      generalRating: values.generalRating !== undefined ? Number(values.generalRating) : undefined,
+      uploadedBy: user.id, 
     };
 
     try {
       const response = await fetch('/api/tools', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(toolData),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
       });
 
-      if (!response.ok) {
+      setIsLoading(false);
+      if (response.ok) {
+        const newTool: AiTool = await response.json();
+        toast.success('הכלי נוסף בהצלחה!');
+        router.push(`/tools/${newTool.id}`); // Navigate to the new tool's page
+      } else {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'שגיאה בהוספת הכלי');
+        console.error('Failed to add tool:', errorData);
+        toast.error(errorData.message || 'שגיאה בהוספת הכלי. נסה שוב.');
       }
-
-      const newTool = await response.json();
-      reset();
-      router.push(`/tools/${newTool.id}`); // Navigate to the new tool's page
     } catch (error) {
-      setSubmitError((error as Error).message);
-    } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
+      console.error('An unexpected error occurred:', error);
+      toast.error('שגיאה לא צפויה. בדוק את החיבור שלך ונסה שוב.');
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">הוספת כלי בינה מלאכותית חדש</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div>
-          <Label htmlFor="name">שם הכלי</Label>
-          <Input id="name" {...register('name')} />
-          {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="description">תיאור</Label>
-          <Textarea id="description" {...register('description')} />
-          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="link">קישור לכלי</Label>
-          <Input id="link" type="url" {...register('link')} />
-          {errors.link && <p className="text-red-500 text-sm mt-1">{errors.link.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="tags">תגיות (מופרדות בפסיק)</Label>
-          <Input id="tags" {...register('tags')} placeholder="לדוגמה: פרודוקטיביות, כתיבה, יצירת תמונות" />
-        </div>
-
-        {submitError && <p className="text-red-500">שגיאה: {submitError}</p>}
-
-        <Button 
-          type="submit" 
-          disabled={isSubmitting} 
-          className="w-full bg-brand-accent hover:bg-opacity-90 text-white font-bold py-3 px-6 rounded-5xl text-lg transition-colors duration-150 shadow hover:shadow-md disabled:opacity-75"
-        >
-          {isSubmitting ? 'שולח...' : 'הוסף כלי'}
-        </Button>
-      </form>
+    <div className="container mx-auto px-4 py-12 max-w-2xl">
+      <Card className="shadow-xl">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold text-brand-primary">הוספת כלי AI חדש למאגר</CardTitle>
+          <CardDescription className="text-lg text-gray-600 dark:text-gray-400 pt-2">
+            שתף את הקהילה בכלי שמצאת ושיכול לעזור למורים אחרים!
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="pt-8">
+          {/* Pass isLoading to the form to potentially disable its own submit button if needed, or use ToolForm's internal isSubmitting */} 
+          <ToolForm onSubmit={handleSubmit} submitButtonText={isLoading ? 'מוסיף כלי...' : 'הוסף כלי למאגר'} />
+        </CardContent>
+      </Card>
     </div>
   );
 } 

@@ -1,8 +1,9 @@
 // This file will contain the logic to interact with the Google Sheets API.
 // We'll use the googleapis library.
 
-import { google, Auth } from 'googleapis';
-import { AiTool } from '@/types'; // Assuming your AiTool type is defined here
+import { google } from 'googleapis';
+import { AiTool, Review, Example } from '@/types'; // Changed ExampleTutorial to Example, or use any if no shared structure
+import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
 
 // TODO: Implement functions to:
 // 1. Authenticate with Google Sheets API (using service account or OAuth2)
@@ -17,197 +18,196 @@ import { AiTool } from '@/types'; // Assuming your AiTool type is defined here
 // 10. Add an example for a tool
 // 11. Manage collections (if stored in Google Sheets, might be client-side or another DB for user-specific data)
 
-// Helper function to get authenticated Google Sheets API client
-async function getSheetsClient(): Promise<ReturnType<typeof google.sheets>> {
+// Function to get the Google Sheets API client
+async function getSheetsClient() {
   const credentialsJson = process.env.GOOGLE_SHEETS_CREDENTIALS;
-  const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-
   if (!credentialsJson) {
-    throw new Error('Missing GOOGLE_SHEETS_CREDENTIALS environment variable. Should contain the full JSON credentials.');
-  }
-  if (!spreadsheetId) {
-    throw new Error('Missing GOOGLE_SHEET_ID environment variable.');
+    throw new Error('GOOGLE_SHEETS_CREDENTIALS environment variable is not set.');
   }
 
   const credentials = JSON.parse(credentialsJson);
-
   const auth = new google.auth.GoogleAuth({
     credentials,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
-
   const authClient = await auth.getClient();
-  return google.sheets({ version: 'v4', auth: authClient as Auth.OAuth2Client });
+  // return google.sheets({ version: 'v4', auth: authClient }); // Previous attempt
+  
+  // Try setting auth directly on the options of the sheets object if direct pass-through causes type issues
+  // This is a workaround and might need adjustment based on the exact library version and types.
+  // A more robust way is to ensure authClient is correctly typed for the 'auth' option.
+  // Forcing type to any for authClient as a temporary measure if specific typing is complex.
+  return google.sheets({ version: 'v4', auth: authClient as any }); 
 }
 
-const SHEET_NAME = 'Tools'; // This matches your sheet name
-const DATA_RANGE = `${SHEET_NAME}!A:V`; // Covers columns A (Timestamp) to V (createdBy)
+const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
+const TOOLS_SHEET_NAME = 'Tools'; // Make sure this matches your sheet name
+const EXAMPLES_SHEET_NAME = 'EXAMPLES';
+const TUTORIALS_SHEET_NAME = 'TUTORIALS';
 
-// Function to map sheet rows to AiTool objects
-// Adjusted to your sheet structure
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapRowToAiTool(row: any[]): AiTool | null {
-  if (!row || !row[0]) { // Timestamp (A) must exist to be a valid row for an ID
-    return null;
-  }
-  // Indices: A=0, B=1, C=2, D=3, E=4, ..., U=20, V=21
-  const id = String(row[0]); // Timestamp as ID
-  const createdAt = String(row[0]); // Timestamp as createdAt
-  const name = String(row[1] || ''); // שם הכלי (B)
-  const link = String(row[2] || ''); // קישור (C)
-  // const logo = String(row[3] || ''); // לוגו (D) - Not currently in AiTool type
-  const description = String(row[4] || ''); // תיאור (E)
-  // Skipping F-T for now as they are not in the basic AiTool type
-  const tagsString = String(row[20] || ''); // tags (U)
-  const createdBy = String(row[21] || 'anonymous'); // createdBy (V)
-
-  return {
-    id,
-    name,
-    description,
-    link,
-    tags: tagsString ? tagsString.split(',').map((tag: string) => tag.trim()).filter(tag => tag) : [],
-    createdBy,
-    createdAt,
+// Helper to map sheet rows to AiTool objects based on the new structure
+function mapRowToAiTool(row: any[], headers: string[]): AiTool {
+  // New headers: ID,שם הכלי,קישור,לוגו,דירוג,תיאור,חסרונות,יתרונות,מגבלות,הועלה ע"י,Timestamp
+  const tool: AiTool = {
+    id: row[0] || '', // ID
+    name: row[1] || '', // שם הכלי
+    link: row[2] || '', // קישור
+    logo: row[3] || undefined, // לוגו
+    generalRating: row[4] || undefined, // דירוג
+    description: row[5] || '', // תיאור
+    cons: row[6] || undefined, // חסרונות
+    pros: row[7] || undefined, // יתרונות
+    limitations: row[8] || undefined, // מגבלות
+    uploadedBy: row[9] || undefined, // הועלה ע"י
+    timestamp: row[10] || undefined, // Timestamp
   };
+  return tool;
 }
 
 export async function getToolsFromSheet(): Promise<AiTool[]> {
   try {
     const sheets = await getSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    
-    console.log(`Fetching tools from sheet: ${spreadsheetId}, range: ${DATA_RANGE}`);
-
     const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: DATA_RANGE,
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${TOOLS_SHEET_NAME}!A:K`, // Adjusted to K for 11 columns (ID to Timestamp)
     });
 
     const rows = response.data.values;
-    if (rows && rows.length) {
-      const tools = rows
-        // Skip header row if present - simple check if first cell of first row is "Timestamp"
-        .filter((row, index) => index === 0 ? String(row[0]).trim().toLowerCase() !== 'timestamp' : true)
-        .map(mapRowToAiTool)
-        .filter(tool => tool !== null && tool.name) as AiTool[]; // Ensure tool is valid and has a name
-      console.log(`Successfully fetched ${tools.length} tools.`);
-      return tools;
+    if (rows && rows.length > 1) {
+      const headers = rows[0]; // Assume first row is headers
+      // Start from 1 to skip header row
+      return rows.slice(1).map(row => mapRowToAiTool(row, headers)).filter(tool => tool.id && tool.name); 
     } else {
-      console.log('No tools found in the sheet or sheet is empty.');
+      console.log('No data found in Tools sheet or sheet is empty.');
       return [];
     }
   } catch (error) {
-    console.error('Error fetching tools from Google Sheets:', error);
-    throw new Error('Failed to fetch tools from Google Sheets');
+    console.error('Error fetching tools from Google Sheet:', error);
+    // It's often better to throw the error or handle it in a way that the caller knows about it
+    // For now, returning an empty array to prevent crashes, but this might hide issues.
+    throw new Error(`Failed to fetch tools: ${error instanceof Error ? error.message : String(error)}`);
   }
-}
-
-export async function addToolToSheet(tool: Omit<AiTool, 'id' | 'createdAt'> & { id?: string; createdAt?: string }): Promise<AiTool> {
-  try {
-    const sheets = await getSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-
-    const newIdAndCreatedAt = new Date().toISOString(); // Use current ISO string for Timestamp, ID, and CreatedAt
-
-    const newToolData: AiTool = {
-        id: newIdAndCreatedAt, // Using new timestamp as ID
-        name: tool.name,
-        description: tool.description,
-        link: tool.link,
-        tags: tool.tags || [],
-        createdBy: tool.createdBy || 'anonymous',
-        createdAt: newIdAndCreatedAt, // Using new timestamp as CreatedAt
-    };
-
-    // Prepare a full row array corresponding to columns A to V
-    // A: Timestamp (ID, CreatedAt), B: שם הכלי, C: קישור, D: לוגו (empty), E: תיאור
-    // F-T: Empty for now
-    // U: tags, V: createdBy
-    const rowValues = new Array(22).fill(''); // Initialize an array for 22 columns (A-V)
-    
-    rowValues[0] = newToolData.createdAt;    // Column A: Timestamp (also ID and CreatedAt)
-    rowValues[1] = newToolData.name;         // Column B: שם הכלי
-    rowValues[2] = newToolData.link;         // Column C: קישור
-    // rowValues[3] is Logo - leave empty
-    rowValues[4] = newToolData.description;  // Column E: תיאור
-    // Columns F (index 5) to T (index 19) remain empty
-    rowValues[20] = newToolData.tags.join(','); // Column U: tags
-    rowValues[21] = newToolData.createdBy;      // Column V: createdBy
-
-
-    console.log("Attempting to append to Google Sheets with values:", [rowValues]);
-
-    const response = await sheets.spreadsheets.values.append({
-      spreadsheetId,
-      range: DATA_RANGE, // Append to the defined data range (e.g., Tools!A:V)
-      valueInputOption: 'USER_ENTERED',
-      insertDataOption: 'INSERT_ROWS',
-      requestBody: {
-        values: [rowValues], // The row to append
-      },
-    });
-    
-    console.log("Successfully appended to Google Sheets. API Response:", response.data);
-    return newToolData;
-
-  } catch (error) {
-    console.error('Error adding tool to Google Sheets:', error);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const err = error as any;
-    if (err.response && err.response.data && err.response.data.error) {
-        console.error('Google API Error Details:', JSON.stringify(err.response.data.error, null, 2));
-        throw new Error(`Google API Error: ${err.response.data.error.message} (Code: ${err.response.data.error.code})`);
-    }
-    throw new Error('Failed to add tool to Google Sheets');
-  }
-}
-
-// Placeholder for other functions if needed in the future
-// export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> { /* ... */ }
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function updateToolInSheet(_id: string, _updates: Partial<AiTool>): Promise<AiTool | null> {
-  // Implementation needed
-  throw new Error('Method not implemented');
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function deleteToolFromSheet(_id: string): Promise<boolean> {
-  // Implementation needed
-  throw new Error('Method not implemented');
 }
 
 export async function getToolByIdFromSheet(id: string): Promise<AiTool | null> {
   try {
-    const sheets = await getSheetsClient();
-    const spreadsheetId = process.env.GOOGLE_SHEET_ID;
-    
-    console.log(`Fetching tool from sheet: ${spreadsheetId}, range: ${DATA_RANGE}`);
-
-    const response = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: DATA_RANGE,
-    });
-
-    const rows = response.data.values;
-    if (rows && rows.length) {
-      const tool = rows
-        .map(mapRowToAiTool)
-        .find(tool => tool && tool.id === id);
-      if (tool) {
-        console.log(`Successfully fetched tool with ID: ${id}`);
-        return tool;
-      } else {
-        console.log(`No tool found with ID: ${id}`);
-        return null;
-      }
-    } else {
-      console.log('No tools found in the sheet or sheet is empty.');
-      return null;
-    }
+    const tools = await getToolsFromSheet();
+    const tool = tools.find(t => t.id === id);
+    return tool || null;
   } catch (error) {
-    console.error('Error fetching tool from Google Sheets:', error);
-    throw new Error('Failed to fetch tool from Google Sheets');
+    console.error(`Error fetching tool with id ${id} from Google Sheet:`, error);
+    throw new Error(`Failed to fetch tool by ID: ${error instanceof Error ? error.message : String(error)}`);
   }
+}
+
+export async function addToolToSheet(toolData: Omit<AiTool, 'id' | 'timestamp' | 'generalRating'> & { generalRating?: string | number }): Promise<AiTool> {
+  try {
+    const sheets = await getSheetsClient();
+    const newId = uuidv4();
+    const newTimestamp = new Date().toISOString();
+
+    // Ensure all fields are defined, defaulting to empty strings or undefined if appropriate for the sheet
+    const newRow = [
+      newId, // ID
+      toolData.name || '',
+      toolData.link || '',
+      toolData.logo || '', // logo can be empty
+      toolData.generalRating !== undefined ? String(toolData.generalRating) : '', // generalRating can be empty
+      toolData.description || '',
+      toolData.cons || '', // cons can be empty
+      toolData.pros || '', // pros can be empty
+      toolData.limitations || '', // limitations can be empty
+      toolData.uploadedBy || '', // uploadedBy can be empty
+      newTimestamp
+    ];
+
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: SPREADSHEET_ID,
+      range: `${TOOLS_SHEET_NAME}!A:K`, // Append to the range of columns
+      valueInputOption: 'USER_ENTERED',
+      requestBody: {
+        values: [newRow],
+      },
+    });
+    
+    // Construct the AiTool object that was added
+    const addedTool: AiTool = {
+        ...toolData,
+        id: newId,
+        timestamp: newTimestamp,
+        generalRating: toolData.generalRating // ensure this is passed correctly
+    };
+    return addedTool;
+
+  } catch (error) {
+    console.error('Error adding tool to Google Sheet:', error);
+    throw new Error(`Failed to add tool: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+// Placeholder functions for reviews, examples, and tutorials - to be implemented
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getReviewsForTool(toolId: string): Promise<Review[]> {
+  console.log(`Fetching reviews for toolId: ${toolId}`);
+  // Actual implementation will read from a 'Reviews' sheet, filtering by toolId
+  return [];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function addReviewToSheet(reviewData: Omit<Review, 'id'>): Promise<Review> {
+  console.log('Adding review:', reviewData);
+  // Actual implementation will add to a 'Reviews' sheet and generate an ID
+  const newReview: Review = { ...reviewData, id: uuidv4() }; 
+  return newReview;
+}
+
+// Similar stubs for Examples and Tutorials
+// For EXAMPLES_SHEET_NAME and TUTORIALS_SHEET_NAME
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getExamplesForTool(toolId: string): Promise<any[]> { 
+  console.log(`Fetching examples for toolId: ${toolId}`);
+  return [];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function addExampleToSheet(exampleData: any): Promise<any> { 
+  console.log('Adding example:', exampleData);
+  const newExample = { ...exampleData, id: uuidv4() };
+  return newExample;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function getTutorialsForTool(toolId: string): Promise<any[]> {
+  console.log(`Fetching tutorials for toolId: ${toolId}`);
+  return [];
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function addTutorialToSheet(tutorialData: any): Promise<any> {
+  console.log('Adding tutorial:', tutorialData);
+  const newTutorial = { ...tutorialData, id: uuidv4() };
+  return newTutorial;
+}
+
+
+// These functions would also need updates if their structure changes or if they interact with the Tools sheet.
+// For now, they are placeholders.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>): Promise<AiTool | null> {
+    // This function will be more complex as it needs to find the row by ID and update specific cells.
+    // This is a simplified placeholder.
+    console.warn('updateToolInSheet is not fully implemented.');
+    const tools = await getToolsFromSheet();
+    const toolIndex = tools.findIndex(t => t.id === toolId);
+    if (toolIndex === -1) return null;
+    // In a real scenario, you'd map AiTool fields back to sheet columns and update the row.
+    return { ...tools[toolIndex], ...updates };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function deleteToolFromSheet(toolId: string): Promise<boolean> {
+    // Deleting rows in Google Sheets API usually involves batchUpdate with a deleteDimension request.
+    // This is a simplified placeholder.
+    console.warn('deleteToolFromSheet is not fully implemented.');
+    return false;
 } 

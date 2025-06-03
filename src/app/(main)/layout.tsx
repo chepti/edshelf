@@ -1,6 +1,7 @@
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import Link from "next/link";
 import Image from "next/image";
-import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { Toaster } from 'react-hot-toast';
 
 export default function MainLayout({
   children,
@@ -8,41 +9,32 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="bg-slate-100 text-slate-800 p-4 shadow-md">
-        <nav className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-3 text-xl font-bold text-slate-700 hover:text-brand-primary transition-colors">
-            <div className="bg-white p-1 rounded-full shadow-sm">
-              <Image src="/logo.png" alt="לוגו אוסף כלי הבינה של חולמים תקשוב" width={36} height={36} />
+    <ClerkProvider>
+      <div dir="rtl" lang="he" className="min-h-screen flex flex-col font-rubik">
+        <Toaster position="top-center" reverseOrder={false} />
+        <header className="bg-brand-primary text-white p-4 shadow-md">
+          <nav className="container mx-auto flex justify-between items-center">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/logo.png" alt="לוגו חולמים תקשוב" width={40} height={40} className="rounded-full" />
+              <span className="text-xl font-semibold">אוסף כלי הבינה של חולמים תקשוב</span>
+            </Link>
+            <div className="flex items-center gap-4">
+              <Link href="/tools" className="hover:text-brand-accent transition-colors">כל הכלים</Link>
+              <Link href="/add-tool" className="hover:text-brand-accent transition-colors">הוספת כלי</Link>
+              <SignedOut>
+                <SignInButton />
+              </SignedOut>
+              <SignedIn>
+                <UserButton afterSignOutUrl="/" />
+              </SignedIn>
             </div>
-            <span>אוסף כלי הבינה של חולמים תקשוב</span>
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/tools" className="text-slate-600 hover:text-brand-primary transition-colors">
-              כל הכלים
-            </Link>
-            <Link href="/add-tool" className="text-slate-600 hover:text-brand-primary transition-colors">
-              הוספת כלי
-            </Link>
-            {/* Add link to My Collections when implemented */}
-            <SignedIn>
-              <UserButton afterSignOutUrl="/" />
-            </SignedIn>
-            <SignedOut>
-              <Link 
-                href="/sign-in" 
-                className="bg-brand-primary hover:bg-opacity-90 text-white font-bold py-2 px-5 rounded-5xl transition-colors duration-150 shadow hover:shadow-md"
-              >
-                כניסה
-              </Link>
-            </SignedOut>
-          </div>
-        </nav>
-      </header>
-      <main className="flex-grow container mx-auto p-4">{children}</main>
-      <footer className="bg-slate-200 text-slate-600 text-center p-4">
-        <p>&copy; {new Date().getFullYear()} קהילת אוסף כלי הבינה של חולמים תקשוב</p>
-      </footer>
-    </div>
+          </nav>
+        </header>
+        <main className="flex-grow container mx-auto p-4">{children}</main>
+        <footer className="bg-gray-100 dark:bg-gray-800 text-center p-4 text-sm text-gray-600 dark:text-gray-400">
+          נבנה באהבה עבור קהילת חולמים תקשוב {new Date().getFullYear()} ©
+        </footer>
+      </div>
+    </ClerkProvider>
   );
 } 

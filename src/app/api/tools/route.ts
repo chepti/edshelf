@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
-import { AiTool } from '@/types';
+// AiTool might not be strictly needed here if addToolToSheet handles the exact type expected
+// import { AiTool } from '@/types'; 
 import { getToolsFromSheet, addToolToSheet } from '@/lib/google-sheets';
+import { toolSchema, ToolFormData } from '@/lib/validators/toolSchema'; // Import Zod schema for validation
+import { auth } from '@clerk/nextjs/server'; // To get user ID on server
 
 // Mock data for now - replace with Google Sheets integration
 // const tools: AiTool[] = [
@@ -37,29 +40,38 @@ export async function GET(_request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    // Validate body if necessary using a library like Zod, or manually
-    const { name, description, link, tags, createdBy } = body as Omit<AiTool, 'id' | 'createdAt'>;
-
-    if (!name || !description || !link) {
-      return NextResponse.json({ message: 'Missing required fields (name, description, link)' }, { status: 400 });
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    // Prepare the data for addToolToSheet, it will generate id and createdAt if not provided
-    const toolDataForSheet: Omit<AiTool, 'id' | 'createdAt'> & { createdBy: string } = {
-      name,
-      description,
-      link,
-      tags: tags || [],
-      createdBy: createdBy || 'anonymous', // Ensure createdBy is always a string
+    const body = await request.json();
+
+    // Validate body using Zod schema
+    const validationResult = toolSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json({ message: 'Invalid input', errors: validationResult.error.flatten().fieldErrors }, { status: 400 });
+    }
+
+    const validatedData: ToolFormData = validationResult.data;
+
+    // Prepare the data for addToolToSheet
+    // addToolToSheet expects an object that matches Omit<AiTool, 'id' | 'timestamp' | 'generalRating'> & { generalRating?: string | number }
+    // It will handle id and timestamp internally.
+    // uploadedBy should be part of AiTool and thus passed through.
+    const toolDataForSheet = {
+      ...validatedData,
+      uploadedBy: userId, // Overwrite/ensure uploadedBy is from the authenticated user
+      // generalRating is already part of validatedData and correctly typed (number | undefined)
     };
 
     const newTool = await addToolToSheet(toolDataForSheet);
-    // tools.push(newTool); // Mock: add to in-memory array - No longer needed
 
     return NextResponse.json(newTool, { status: 201 });
   } catch (error) {
     console.error("Failed to add tool:", error);
-    return NextResponse.json({ message: (error as Error).message || 'Failed to add tool' }, { status: 500 });
+    // Check if error is an instance of Error to safely access message property
+    const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    return NextResponse.json({ message: errorMessage }, { status: 500 });
   }
 } 
