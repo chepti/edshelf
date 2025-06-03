@@ -19,8 +19,6 @@ const config: Config = {
     },
     extend: {
       colors: {
-        'brand-primary': '#17a4d6',
-        'brand-accent': '#f79c07',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -54,15 +52,17 @@ const config: Config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        'brand-primary': 'hsl(var(--brand-primary-hsl))',
+        'brand-accent': 'hsl(var(--brand-accent-hsl))',
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-        // Adding a custom very rounded option as requested
-        '4xl': '2rem', // Approx 32px, can be adjusted. '40px' is also an option but Tailwind uses rem more often.
-        '5xl': '2.5rem', // Approx 40px
-        'full': '9999px',
+        '2xl': 'calc(var(--radius) + 4px)',
+        '3xl': 'calc(var(--radius) + 8px)',
+        '4xl': '2rem',
+        '5xl': '2.5rem',
       },
       keyframes: {
         'accordion-down': {
