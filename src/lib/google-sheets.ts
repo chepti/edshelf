@@ -2,7 +2,7 @@
 // We'll use the googleapis library.
 
 import { google } from 'googleapis';
-import { AiTool, Review, Example } from '@/types'; // Changed ExampleTutorial to Example, or use any if no shared structure
+import { AiTool, Review } from '@/types';
 import { v4 as uuidv4 } from 'uuid'; // For generating unique IDs
 
 // TODO: Implement functions to:
@@ -31,35 +31,31 @@ async function getSheetsClient() {
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   const authClient = await auth.getClient();
-  // return google.sheets({ version: 'v4', auth: authClient }); // Previous attempt
-  
-  // Try setting auth directly on the options of the sheets object if direct pass-through causes type issues
-  // This is a workaround and might need adjustment based on the exact library version and types.
-  // A more robust way is to ensure authClient is correctly typed for the 'auth' option.
-  // Forcing type to any for authClient as a temporary measure if specific typing is complex.
-  return google.sheets({ version: 'v4', auth: authClient as any }); 
+  // Attempting to remove 'as any' to see if type inference works now
+  return google.sheets({ version: 'v4', auth: authClient }); 
 }
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
-const TOOLS_SHEET_NAME = 'Tools'; // Make sure this matches your sheet name
-const EXAMPLES_SHEET_NAME = 'EXAMPLES';
-const TUTORIALS_SHEET_NAME = 'TUTORIALS';
+const TOOLS_SHEET_NAME = 'כלי AI לחינוך - Tools'; 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const EXAMPLES_SHEET_NAME = 'כלי AI לחינוך - EXAMPLES';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const TUTORIALS_SHEET_NAME = 'כלי AI לחינוך - TUTORIALS';
 
 // Helper to map sheet rows to AiTool objects based on the new structure
-function mapRowToAiTool(row: any[], headers: string[]): AiTool {
-  // New headers: ID,שם הכלי,קישור,לוגו,דירוג,תיאור,חסרונות,יתרונות,מגבלות,הועלה ע"י,Timestamp
+function mapRowToAiTool(row: (string | number | boolean | null)[], _headers: string[]): AiTool { // _headers to mark as unused, row typed more specifically
   const tool: AiTool = {
-    id: row[0] || '', // ID
-    name: row[1] || '', // שם הכלי
-    link: row[2] || '', // קישור
-    logo: row[3] || undefined, // לוגו
-    generalRating: row[4] || undefined, // דירוג
-    description: row[5] || '', // תיאור
-    cons: row[6] || undefined, // חסרונות
-    pros: row[7] || undefined, // יתרונות
-    limitations: row[8] || undefined, // מגבלות
-    uploadedBy: row[9] || undefined, // הועלה ע"י
-    timestamp: row[10] || undefined, // Timestamp
+    id: String(row[0] || ''), // ID
+    name: String(row[1] || ''), // שם הכלי
+    link: String(row[2] || ''), // קישור
+    logo: row[3] ? String(row[3]) : undefined, // לוגו
+    generalRating: row[4] ? Number(row[4]) : undefined, // דירוג
+    description: String(row[5] || ''), // תיאור
+    cons: row[6] ? String(row[6]) : undefined, // חסרונות
+    pros: row[7] ? String(row[7]) : undefined, // יתרונות
+    limitations: row[8] ? String(row[8]) : undefined, // מגבלות
+    uploadedBy: row[9] ? String(row[9]) : undefined, // הועלה ע"י
+    timestamp: row[10] ? String(row[10]) : undefined, // Timestamp
   };
   return tool;
 }
@@ -163,36 +159,35 @@ export async function addReviewToSheet(reviewData: Omit<Review, 'id'>): Promise<
 
 // Similar stubs for Examples and Tutorials
 // For EXAMPLES_SHEET_NAME and TUTORIALS_SHEET_NAME
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function getExamplesForTool(toolId: string): Promise<any[]> { 
   console.log(`Fetching examples for toolId: ${toolId}`);
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function addExampleToSheet(exampleData: any): Promise<any> { 
   console.log('Adding example:', exampleData);
   const newExample = { ...exampleData, id: uuidv4() };
   return newExample;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function getTutorialsForTool(toolId: string): Promise<any[]> {
   console.log(`Fetching tutorials for toolId: ${toolId}`);
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function addTutorialToSheet(tutorialData: any): Promise<any> {
   console.log('Adding tutorial:', tutorialData);
   const newTutorial = { ...tutorialData, id: uuidv4() };
   return newTutorial;
 }
 
-
 // These functions would also need updates if their structure changes or if they interact with the Tools sheet.
 // For now, they are placeholders.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>): Promise<AiTool | null> {
     // This function will be more complex as it needs to find the row by ID and update specific cells.
     // This is a simplified placeholder.
@@ -204,7 +199,7 @@ export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>
     return { ...tools[toolIndex], ...updates };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
 export async function deleteToolFromSheet(toolId: string): Promise<boolean> {
     // Deleting rows in Google Sheets API usually involves batchUpdate with a deleteDimension request.
     // This is a simplified placeholder.

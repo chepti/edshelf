@@ -1,14 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
-// import Link from 'next/link'; // Removed
-import { AiTool, Review, Example } from '@/types';
+import { AiTool } from '@/types';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-// import { ExternalLink, MessageSquare, Star, PlusCircle, FileText, Users } from 'lucide-react'; // Modified
-import { ExternalLink, MessageSquare, Star, PlusCircle, FileText, BookText, GraduationCap } from 'lucide-react'; // Modified
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { ExternalLink, MessageSquare, Star, BookText, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -16,8 +12,6 @@ import Link from 'next/link';
 async function fetchToolById(id: string): Promise<AiTool | null> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/tools/${id}`);
   if (!res.ok) {
-    // This will activate the closest `error.js` Error Boundary
-    // throw new Error('Failed to fetch tool');
     console.error('Failed to fetch tool', res.status, await res.text());
     return null;
   }
@@ -29,24 +23,54 @@ async function fetchToolById(id: string): Promise<AiTool | null> {
   }
 }
 
-async function fetchReviewsByToolId(toolId: string): Promise<Review[]> {
-  const res = await fetch(`/api/reviews?toolId=${toolId}`);
-  if (!res.ok) throw new Error('שגיאה באחזור הביקורות'); // Translated
-  return res.json();
-}
+export default function ToolDetailPage({ params }: { params: { id: string } }) {
+  const [tool, setTool] = useState<AiTool | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-async function fetchExamplesByToolId(toolId: string): Promise<Example[]> {
-  const res = await fetch(`/api/examples?toolId=${toolId}`);
-  if (!res.ok) throw new Error('שגיאה באחזור הדוגמאות'); // Translated
-  return res.json();
-}
+  useEffect(() => {
+    if (params.id) {
+      const loadTool = async () => {
+        setLoading(true);
+        try {
+          const fetchedTool = await fetchToolById(params.id);
+          if (fetchedTool) {
+            setTool(fetchedTool);
+          } else {
+            setError('כלי לא נמצא.'); // Tool not found
+          }
+        } catch (e) {
+          console.error('Error fetching tool details:', e);
+          setError('שגיאה בטעינת פרטי הכלי.'); // Error loading tool details
+        }
+        setLoading(false);
+      };
+      loadTool();
+    }
+  }, [params.id]);
 
-export default async function ToolDetailPage({ params }: { params: { id: string } }) {
-  const tool = await fetchToolById(params.id);
-  // const reviews = await fetchReviewsForTool(params.id); // Example for future use
-  // const examples = await fetchExamplesForTool(params.id); // Example for future use
+  if (loading) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p className="text-lg">טוען פרטי כלי...</p> {/* Loading tool details... */}
+      </div>
+    );
+  }
 
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <h1 className="text-3xl font-bold text-red-500 mb-4">שגיאה</h1>
+        <p className="text-lg text-gray-600 dark:text-gray-400">{error}</p>
+        <Link href="/tools" className="mt-6 inline-block bg-brand-primary text-white font-semibold py-2 px-6 rounded-lg hover:bg-opacity-90 transition-colors">
+          חזרה לרשימת הכלים
+        </Link>
+      </div>
+    );
+  }
+  
   if (!tool) {
+    // This case should ideally be handled by the error state above if fetchToolById returns null
     return (
       <div className="container mx-auto px-4 py-8 text-center">
         <h1 className="text-3xl font-bold text-brand-primary mb-4">אופס! כלי לא נמצא</h1>
