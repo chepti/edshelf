@@ -9,8 +9,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { fetchToolById } from '@/lib/client-utils';
 
-// Using simple inline props for App Router page component
-export default function ToolDetailPage({ params }: { params: { id: string } }) {
+// Define PageProps locally to specify the expected structure
+interface PageProps {
+  params: { id: string };
+  searchParams?: { [key: string]: string | string[] | undefined };
+}
+
+export default function ToolDetailPage({ params /*, searchParams */ }: PageProps) {
   const [tool, setTool] = useState<AiTool | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
