@@ -8,6 +8,13 @@ import { ExternalLink, MessageSquare, Star, BookText, GraduationCap } from 'luci
 import Image from 'next/image';
 import Link from 'next/link';
 
+interface ToolDetailPageProps {
+  params: {
+    id: string;
+  };
+  // searchParams?: { [key: string]: string | string[] | undefined }; // For potential future use
+}
+
 // Mock fetching functions - replace with actual API calls
 async function fetchToolById(id: string): Promise<AiTool | null> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/tools/${id}`);
@@ -23,7 +30,7 @@ async function fetchToolById(id: string): Promise<AiTool | null> {
   }
 }
 
-export default function ToolDetailPage({ params }: { params: { id: string } }) {
+export default function ToolDetailPage({ params }: ToolDetailPageProps) {
   const [tool, setTool] = useState<AiTool | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
