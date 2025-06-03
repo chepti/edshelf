@@ -31,8 +31,8 @@ async function getSheetsClient() {
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
   });
   const authClient = await auth.getClient();
-  // Attempting to remove 'as any' to see if type inference works now
-  return google.sheets({ version: 'v4', auth: authClient }); 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return google.sheets({ version: 'v4', auth: authClient as any }); 
 }
 
 const SPREADSHEET_ID = process.env.GOOGLE_SHEET_ID;
@@ -43,7 +43,7 @@ const EXAMPLES_SHEET_NAME = 'כלי AI לחינוך - EXAMPLES';
 const TUTORIALS_SHEET_NAME = 'כלי AI לחינוך - TUTORIALS';
 
 // Helper to map sheet rows to AiTool objects based on the new structure
-function mapRowToAiTool(row: (string | number | boolean | null)[], _headers: string[]): AiTool { // _headers to mark as unused, row typed more specifically
+function mapRowToAiTool(row: (string | number | boolean | null)[]): AiTool { // Removed _headers
   const tool: AiTool = {
     id: String(row[0] || ''), // ID
     name: String(row[1] || ''), // שם הכלי
@@ -70,9 +70,8 @@ export async function getToolsFromSheet(): Promise<AiTool[]> {
 
     const rows = response.data.values;
     if (rows && rows.length > 1) {
-      const headers = rows[0]; // Assume first row is headers
-      // Start from 1 to skip header row
-      return rows.slice(1).map(row => mapRowToAiTool(row, headers)).filter(tool => tool.id && tool.name); 
+      // const headers = rows[0]; // Headers are not used in mapRowToAiTool anymore
+      return rows.slice(1).map(row => mapRowToAiTool(row as (string | number | boolean | null)[])).filter(tool => tool.id && tool.name); 
     } else {
       console.log('No data found in Tools sheet or sheet is empty.');
       return [];
@@ -187,19 +186,16 @@ export async function addTutorialToSheet(tutorialData: any): Promise<any> {
 
 // These functions would also need updates if their structure changes or if they interact with the Tools sheet.
 // For now, they are placeholders.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>): Promise<AiTool | null> {
-    // This function will be more complex as it needs to find the row by ID and update specific cells.
-    // This is a simplified placeholder.
     console.warn('updateToolInSheet is not fully implemented.');
     const tools = await getToolsFromSheet();
     const toolIndex = tools.findIndex(t => t.id === toolId);
     if (toolIndex === -1) return null;
-    // In a real scenario, you'd map AiTool fields back to sheet columns and update the row.
     return { ...tools[toolIndex], ...updates };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteToolFromSheet(toolId: string): Promise<boolean> {
     // Deleting rows in Google Sheets API usually involves batchUpdate with a deleteDimension request.
     // This is a simplified placeholder.
