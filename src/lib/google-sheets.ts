@@ -141,52 +141,45 @@ export async function addToolToSheet(toolData: Omit<AiTool, 'id' | 'timestamp' |
 }
 
 // Placeholder functions for reviews, examples, and tutorials - to be implemented
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function getReviewsForTool(toolId: string): Promise<Review[]> {
   console.log(`Fetching reviews for toolId: ${toolId}`);
-  // Actual implementation will read from a 'Reviews' sheet, filtering by toolId
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function addReviewToSheet(reviewData: Omit<Review, 'id'>): Promise<Review> {
   console.log('Adding review:', reviewData);
-  // Actual implementation will add to a 'Reviews' sheet and generate an ID
   const newReview: Review = { ...reviewData, id: uuidv4() }; 
   return newReview;
 }
 
 // Similar stubs for Examples and Tutorials
 // For EXAMPLES_SHEET_NAME and TUTORIALS_SHEET_NAME
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getExamplesForTool(toolId: string): Promise<any[]> { 
   console.log(`Fetching examples for toolId: ${toolId}`);
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function addExampleToSheet(exampleData: any): Promise<any> { 
   console.log('Adding example:', exampleData);
   const newExample = { ...exampleData, id: uuidv4() };
   return newExample;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function getTutorialsForTool(toolId: string): Promise<any[]> {
   console.log(`Fetching tutorials for toolId: ${toolId}`);
   return [];
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function addTutorialToSheet(tutorialData: any): Promise<any> {
   console.log('Adding tutorial:', tutorialData);
   const newTutorial = { ...tutorialData, id: uuidv4() };
   return newTutorial;
 }
 
-// These functions would also need updates if their structure changes or if they interact with the Tools sheet.
-// For now, they are placeholders.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>): Promise<AiTool | null> {
     console.warn('updateToolInSheet is not fully implemented.');
     const tools = await getToolsFromSheet();
@@ -195,10 +188,7 @@ export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>
     return { ...tools[toolIndex], ...updates };
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export async function deleteToolFromSheet(toolId: string): Promise<boolean> {
-    // Deleting rows in Google Sheets API usually involves batchUpdate with a deleteDimension request.
-    // This is a simplified placeholder.
     console.warn('deleteToolFromSheet is not fully implemented.');
     return false;
 } 
