@@ -1,14 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Assistant } from "next/font/google";
 import "./globals.css";
 import { ClerkProvider } from '@clerk/nextjs';
 // import { dark } from '@clerk/themes'; // Optional: if you want a dark theme for Clerk components
 
-const inter = Inter({ subsets: ["latin"] });
+const assistant = Assistant({ 
+  subsets: ["hebrew"],
+  weight: ["400", "700"]
+});
 
 export const metadata: Metadata = {
-  title: "AI Tools for Teachers",
-  description: "A community-driven repository of AI tools for educators.",
+  title: "אוסף כלי הבינה של חולמים תקשוב",
+  description: "מאגר קהילתי של כלי בינה מלאכותית לאנשי חינוך והוראה.",
 };
 
 export default function RootLayout({
@@ -25,8 +28,8 @@ export default function RootLayout({
       //   }
       // }}
     >
-      <html lang="en">
-        <body className={inter.className}>{children}</body>
+      <html lang="he" dir="rtl">
+        <body className={assistant.className}>{children}</body>
       </html>
     </ClerkProvider>
   );

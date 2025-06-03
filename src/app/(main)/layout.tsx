@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { UserButton, SignedIn, SignedOut } from "@clerk/nextjs";
 
 export default function MainLayout({
@@ -10,15 +11,16 @@ export default function MainLayout({
     <div className="min-h-screen flex flex-col">
       <header className="bg-gray-800 text-white p-4">
         <nav className="container mx-auto flex justify-between items-center">
-          <Link href="/" className="text-xl font-bold">
-            AI Tools for Teachers
+          <Link href="/" className="flex items-center gap-2 text-xl font-bold">
+            <Image src="/logo.png" alt="לוגו אוסף כלי הבינה של חולמים תקשוב" width={32} height={32} />
+            <span>אוסף כלי הבינה של חולמים תקשוב</span>
           </Link>
           <div className="flex items-center gap-4">
             <Link href="/tools" className="hover:underline">
-              All Tools
+              כל הכלים
             </Link>
             <Link href="/add-tool" className="hover:underline">
-              Add Tool
+              הוספת כלי
             </Link>
             {/* Add link to My Collections when implemented */}
             <SignedIn>
@@ -26,7 +28,7 @@ export default function MainLayout({
             </SignedIn>
             <SignedOut>
               <Link href="/sign-in" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                Sign In
+                כניסה
               </Link>
             </SignedOut>
           </div>
@@ -34,7 +36,7 @@ export default function MainLayout({
       </header>
       <main className="flex-grow container mx-auto p-4">{children}</main>
       <footer className="bg-gray-200 text-center p-4">
-        <p>&copy; {new Date().getFullYear()} AI Tools for Teachers Community</p>
+        <p>&copy; {new Date().getFullYear()} קהילת אוסף כלי הבינה של חולמים תקשוב</p>
       </footer>
     </div>
   );

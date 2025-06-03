@@ -107,4 +107,46 @@ Create a full Next.js application for a community repository of AI tools for tea
 *   Refine UI/UX and add more styling.
 *   Write tests.
 
+## Date: 2024-07-28
+
+### Vercel Deployment Issues (Google Sheets API & TypeScript)
+
+1.  **Google Sheets Authentication on Vercel:**
+    *   **Initial Error:** `Error: Google API Error: Requested entity was not found. (Code: 404)` post-deployment, despite working locally.
+    *   **Diagnosis:**
+        *   Initially suspected `GOOGLE_SHEET_ID` or Service Account permissions.
+        *   Identified issue with Vercel's parsing of `GOOGLE_SHEETS_CREDENTIALS` environment variable (JSON content), especially `\n` characters in the private key.
+        *   `SyntaxError: Unexpected token 'h', ..."ert_url": https://ww"... is not valid JSON` confirmed JSON parsing failure on Vercel.
+    *   **Resolution:** Pasted the full JSON content as a single continuous string (with `\n` preserved as text) into the Vercel environment variable.
+    *   **Follow-up Issue:** Post-JSON fix, 404 error persisted. Discovered a typo (missing '1' instead of 'l') in the `GOOGLE_SHEET_ID` on Vercel. Correcting the ID resolved Google Sheets access.
+
+2.  **"Tool not found" After Adding New Tool:**
+    *   **Diagnosis:** Navigating to a new tool's page after adding it resulted in "Tool not found". The `fetchToolById` function on the tool detail page (`src/app/(main)/tools/[id]/page.tsx`) was fetching all tools and performing a client-side search, causing the new tool not to be immediately available.
+    *   **Resolution:**
+        *   Added `getToolByIdFromSheet(id: string)` function to `src/lib/google-sheets.ts` to fetch a specific tool.
+        *   Created a new dynamic API Route `src/app/api/tools/[id]/route.ts` utilizing this function.
+        *   Updated `fetchToolById` on the client page to call the new API Route.
+
+3.  **Recurring TypeScript and ESLint Errors in Dynamic API Route (`src/app/api/tools/[id]/route.ts`):**
+    *   **Error 1 (ESLint):** `Error: '_id' is defined but never used.` etc., in placeholder functions in `google-sheets.ts`.
+        *   **Attempt 1:** Added `eslint-disable-next-line @typescript-eslint/no-unused-vars` above functions.
+        *   **Attempt 2:** Renamed params to `_id`, `_updates`.
+        *   **Resolution:** Reverted to `eslint-disable-next-line @typescript-eslint/no-unused-vars` above the placeholder functions.
+    *   **Error 2 (TypeScript in Vercel Build):** `Type error: Route "src/app/api/tools/[id]/route.ts" has an invalid "GET" export: Type "{ params: { id: string; }; }" is not a valid type for the function's second argument.`
+        *   **Attempt 1:** Changed `request: Request` to `request: NextRequest`.
+        *   **Attempt 2:** Used `RouteContext` interface for the second argument.
+        *   **Attempt 3 (Reverted to Docs):** `request: NextRequest, { params }: { params: { id: string } }`.
+        *   **Attempt 4 (Workaround):** Used `context: any` and internal type assertion.
+    *   **Error 3 (ESLint in Vercel Build):** `Error: Unexpected any. Specify a different type. @typescript-eslint/no-explicit-any` after using `context: any`.
+        *   **Resolution (Current):** Added `// eslint-disable-next-line @typescript-eslint/no-explicit-any` above the `context: any` definition in the GET function.
+
+4.  **Git Operations:** All changes were pushed to the `main` branch on GitHub.
+
+### Next Steps (Potential):
+*   Verify the latest Vercel deployment (with the `no-explicit-any` workaround) is successful.
+*   **Proceed with further design and feature development!**
+*   Investigate a cleaner solution for the typing issue in the dynamic API Route, instead of relying on `any`.
+*   Implement the placeholder functions (`updateToolInSheet`, `deleteToolFromSheet`).
+*   Implement adding reviews and examples.
+*   Develop UI for user collections.
 --- 

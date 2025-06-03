@@ -12,7 +12,7 @@ import { ExternalLink } from 'lucide-react';
 async function fetchTools(): Promise<AiTool[]> {
   const res = await fetch('/api/tools');
   if (!res.ok) {
-    throw new Error('Failed to fetch tools');
+    throw new Error('שגיאה באחזור הכלים');
   }
   return res.json();
 }
@@ -38,29 +38,29 @@ export default function ToolsPage() {
   const filteredTools = tools.filter(tool =>
     tool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tool.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    tool.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    (tool.tags && tool.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
   );
 
-  if (loading) return <p>Loading tools...</p>;
-  if (error) return <p>Error loading tools: {error}</p>;
+  if (loading) return <p>טוען כלים...</p>;
+  if (error) return <p>שגיאה בטעינת הכלים: {error}</p>;
 
   return (
     <div>
       <div className="mb-6 flex justify-between items-center">
-        <h1 className="text-3xl font-bold">AI Tools</h1>
+        <h1 className="text-3xl font-bold">מאגר הכלים</h1>
         <Link href="/add-tool">
-          <Button>Add New Tool</Button>
+          <Button>הוספת כלי חדש</Button>
         </Link>
       </div>
       <Input
         type="text"
-        placeholder="Search tools by name, description, or tag..."
+        placeholder="חיפוש כלים לפי שם, תיאור או תגית..."
         value={searchTerm}
         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
         className="mb-6"
       />
       {filteredTools.length === 0 && !loading && (
-        <p>No tools found matching your criteria. Try a different search or <Link href="/add-tool" className="text-blue-500 hover:underline">add a new one</Link>!</p>
+        <p>לא נמצאו כלים התואמים את החיפוש שלך. נסה חיפוש אחר או <Link href="/add-tool" className="text-blue-500 hover:underline">הוסף כלי חדש</Link>!</p>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTools.map(tool => (
@@ -68,7 +68,7 @@ export default function ToolsPage() {
             <CardHeader>
               <CardTitle className="flex justify-between items-start">
                 {tool.name}
-                <a href={tool.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700">
+                <a href={tool.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-700" title="פתח קישור בכרטיסיה חדשה">
                   <ExternalLink size={20} />
                 </a>
               </CardTitle>
@@ -76,7 +76,7 @@ export default function ToolsPage() {
             </CardHeader>
             <CardContent>
               <div className="mb-2">
-                <strong>Created by:</strong> {tool.createdBy}
+                <strong>נוצר על ידי:</strong> {tool.createdBy}
               </div>
               {tool.tags && tool.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2">
@@ -88,7 +88,7 @@ export default function ToolsPage() {
             </CardContent>
             <CardFooter>
               <Link href={`/tools/${tool.id}`} className="w-full">
-                <Button variant="outline" className="w-full">View Details</Button>
+                <Button variant="outline" className="w-full">פרטים נוספים</Button>
               </Link>
             </CardFooter>
           </Card>
