@@ -7,21 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/componen
 import { ExternalLink, MessageSquare, Star, BookText, GraduationCap } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-
-// Mock fetching functions - replace with actual API calls
-async function fetchToolById(id: string): Promise<AiTool | null> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/tools/${id}`);
-  if (!res.ok) {
-    console.error('Failed to fetch tool', res.status, await res.text());
-    return null;
-  }
-  try {
-    return await res.json();
-  } catch (e) {
-    console.error('Failed to parse tool JSON', e);
-    return null;
-  }
-}
+import { fetchToolById } from '@/lib/client-utils';
 
 // Using simple inline props for App Router page component
 export default function ToolDetailPage({ params }: { params: { id: string } }) {
