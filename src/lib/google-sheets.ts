@@ -188,7 +188,7 @@ export async function updateToolInSheet(toolId: string, updates: Partial<AiTool>
     return { ...tools[toolIndex], ...updates };
 }
 
-export async function deleteToolFromSheet(toolId: string): Promise<boolean> {
+export async function deleteToolFromSheet(_toolId: string): Promise<boolean> {
     console.warn('deleteToolFromSheet is not fully implemented.');
     return false;
 } 
